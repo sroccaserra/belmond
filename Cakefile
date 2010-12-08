@@ -8,7 +8,7 @@ path = require 'path'
 villainCake = require 'villain/build/cake'
 villain = require 'villain'
 
-BUNDLE_FILE = './site/scripts/bundle.js'
+BUNDLE_FILE = './site/scripts/belmond.js'
 
 task 'bundle', 'Sorts the dependencies and bundles sources', ->
     invoke 'build'
