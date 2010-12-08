@@ -13,7 +13,7 @@ exports.start = (screen)->
     window.setInterval gloop(context), config.dt
 
 # Some rectangles to draw
-rectangles = (new Rectangle() for x in [1..200])
+rectangles = (new Rectangle(config.height) for x in [1..200])
 
 # game loop functions
 drawBackgroundOn = (context) ->
@@ -28,7 +28,7 @@ drawOn = (context) ->
     rectangle.drawOn context for rectangle in rectangles
 
 update = (dt) ->
-    rectangle.update() for rectangle in rectangles
+    rectangle.update(config.width) for rectangle in rectangles
 
 gloop = (context) ->
     ->

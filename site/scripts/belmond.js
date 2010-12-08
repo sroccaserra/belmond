@@ -57,7 +57,7 @@ require.module('main/index', function(module, exports, require) {
   rectangles = (function() {
     _results = [];
     for (x = 1; x <= 200; x++) {
-      _results.push(new Rectangle());
+      _results.push(new Rectangle(config.height));
     }
     return _results;
   }());
@@ -84,7 +84,7 @@ require.module('main/index', function(module, exports, require) {
     _results = [];
     for (_i = 0, _len = rectangles.length; _i < _len; _i++) {
       rectangle = rectangles[_i];
-      _results.push(rectangle.update());
+      _results.push(rectangle.update(config.width));
     }
     return _results;
   };
@@ -99,27 +99,26 @@ require.module('main/index', function(module, exports, require) {
 });
 require.module('main/rectangle', function(module, exports, require) {
 (function() {
-  var Rectangle, config;
-  config = require('./config');
+  var Rectangle;
   Rectangle = function() {
-    function Rectangle() {
+    function Rectangle(screenHeight) {
       var maxHeight, minHeight, randomColor;
       minHeight = 0;
-      maxHeight = config.height / 2;
+      maxHeight = screenHeight / 2;
       randomColor = parseInt(Math.random() * 255);
       this.width = 5 + Math.random() * 60;
       this.height = minHeight + Math.random() * (maxHeight - minHeight);
       this.speed = 1 + Math.random() * 8;
       this.style = "rgba(10, " + randomColor + ", 10, " + (Math.random()) + ")";
-      this.y = -this.height + Math.random() * (config.height + this.height);
+      this.y = -this.height + Math.random() * (screenHeight + this.height);
       this.x = -this.width * 20;
     }
     Rectangle.prototype.reset = function() {
       return this.x = -this.width;
     };
-    Rectangle.prototype.update = function() {
+    Rectangle.prototype.update = function(xMax) {
       this.x = this.x + this.speed;
-      if (this.x > config.width) {
+      if (this.x > xMax) {
         return this.reset();
       }
     };

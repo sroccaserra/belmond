@@ -1,12 +1,10 @@
 ##
 # Rectangle definition
 
-config = require './config'
-
 class Rectangle
-    constructor: ->
+    constructor: (screenHeight)->
         minHeight = 0
-        maxHeight = config.height/2
+        maxHeight = screenHeight/2
 
         randomColor = parseInt Math.random()*255
 
@@ -15,15 +13,15 @@ class Rectangle
         @speed = 1 + Math.random()*8
         @style = "rgba(10, #{randomColor}, 10, #{Math.random()})"
 
-        @y = -@height + Math.random()*(config.height + @height)
+        @y = -@height + Math.random()*(screenHeight + @height)
         @x = -@width * 20
 
     reset: ->
         @x = -@width
 
-    update: ->
+    update: (xMax) ->
         @x = @x + @speed
-        if @x > config.width
+        if @x > xMax
             this.reset()
 
     drawOn: (context) ->

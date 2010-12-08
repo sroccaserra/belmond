@@ -2,7 +2,7 @@ rectangle = require 'rectangle'
 
 describe 'Rectangle', ->
     it 'can be created', ->
-        rect = new rectangle.Rectangle()
+        rect = new rectangle.Rectangle(1000)
         expect(rect).toBeDefined()
 
         expect(rect.x).toBeDefined()
