@@ -1,0 +1,25 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Canvas test</title>
+        <script type="text/javascript" src="scripts/jquery-1.4.4.js"></script>
+        <script type="text/javascript" src="scripts/bundle.js"></script>
+        <style type="text/css">
+            body {background-color: grey}
+            .centered {text-align: center}
+        </style>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                var main = require('main');
+                $('#main').append('<canvas id="screen" width="'+
+                    main.config.width +
+                    '" height="' + main.config.height + '">Here be canvas</canvas>')
+                var screen = $('#screen')[0]
+                main.start(screen);
+            });
+        </script>
+    </head>
+    <body>
+        <div id="main">
+        </div>
+    </body>
+</html>
