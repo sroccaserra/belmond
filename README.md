@@ -1,3 +1,6 @@
+Belmond
+=======
+
 Small test (see it [here](http://sroccaserra.github.com/belmond/)) to explore CoffeeScript and HTML5 canvas. At the moment, it's just a bouncing text and a bunch of random transparent rectangles moving around on a gradient background.
 
 Dependencies
