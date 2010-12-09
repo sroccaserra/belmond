@@ -43,15 +43,10 @@ end
 # ---------
 
 def run_all
-    run_all_specs_in(File.join(Dir.pwd, 'spec'))
+    run "Running all specs:" do
+        `#{RUNNER}`
+    end
 end
-
-def run_all_specs_in(target)
-  run "Running all in: #{target}" do
-    `#{RUNNER} #{target}`
-  end
-end
-
 
 def run(description, &block)
   puts "#{description}"
