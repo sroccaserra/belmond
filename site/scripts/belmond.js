@@ -45,17 +45,18 @@
 }).call(this);
 require.module('main/index', function(module, exports, require) {
 (function() {
-  var BouncingText, Rectangle, bouncingText, config, drawBackgroundOn, drawOn, gloop, rectangles, update, x, _results;
+  var BouncingText, NeonText, Rectangle, bouncingText, clearShadows, config, drawBackgroundOn, drawOn, getGameLoop, neonText, rectangles, update, x, _results;
   config = require('./config');
   BouncingText = require('./bouncingtext').BouncingText;
   Rectangle = require('./rectangle').Rectangle;
+  NeonText = require('./neontext').NeonText;
   exports.config = config;
   exports.start = function(screen) {
     var context;
     context = screen.getContext('2d');
-    return window.setInterval(gloop(context), config.dt);
+    return window.setInterval(getGameLoop(context), config.dt);
   };
-  bouncingText = new BouncingText("Belmond v0.0.1", config.width / 2, config.height * .25, config.height * .75);
+  bouncingText = new BouncingText("Belmond", config.width / 2, config.height * .25, config.height * .75);
   rectangles = (function() {
     _results = [];
     for (x = 1; x <= 200; x++) {
@@ -63,6 +64,7 @@ require.module('main/index', function(module, exports, require) {
     }
     return _results;
   }());
+  neonText = new NeonText(config.version);
   drawBackgroundOn = function(context) {
     var lingrad;
     lingrad = context.createLinearGradient(0, 0, 0, config.height);
@@ -74,32 +76,34 @@ require.module('main/index', function(module, exports, require) {
     context.fillStyle = lingrad;
     return context.fillRect(0, 0, config.width, config.height);
   };
-  drawOn = function(context) {
-    var rectangle, _i, _len, _results;
-    drawBackgroundOn(context);
-    bouncingText.drawOn(context);
+  clearShadows = function(context) {
     context.shadowOffsetX = null;
     context.shadowOffsetY = null;
     context.shadowBlur = null;
-    context.shadowColor = null;
-    _results = [];
+    return context.shadowColor = null;
+  };
+  drawOn = function(context) {
+    var rectangle, _i, _len;
+    drawBackgroundOn(context);
+    bouncingText.drawOn(context);
+    clearShadows(context);
     for (_i = 0, _len = rectangles.length; _i < _len; _i++) {
       rectangle = rectangles[_i];
-      _results.push(rectangle.drawOn(context));
+      rectangle.drawOn(context);
     }
-    return _results;
+    neonText.drawOn(context, config.width - 10, config.height - 10);
+    return clearShadows(context);
   };
   update = function(dt) {
-    var rectangle, _i, _len, _results;
+    var rectangle, _i, _len;
     bouncingText.update();
-    _results = [];
     for (_i = 0, _len = rectangles.length; _i < _len; _i++) {
       rectangle = rectangles[_i];
-      _results.push(rectangle.update(config.width));
+      rectangle.update(config.width);
     }
-    return _results;
+    return neonText.update();
   };
-  gloop = function(context) {
+  getGameLoop = function(context) {
     return function() {
       drawOn(context);
       return update(config.dt);
@@ -112,7 +116,8 @@ require.module('main/config', function(module, exports, require) {
 (function() {
   exports.width = 1000;
   exports.height = 100;
-  exports.dt = 100 / 6;
+  exports.dt = 100 / 5;
+  exports.version = "v0.0.2";
 }).call(this);
 
 });
@@ -226,6 +231,39 @@ require.module('main/rectangle', function(module, exports, require) {
     return Rectangle;
   }();
   exports.Rectangle = Rectangle;
+}).call(this);
+
+});
+require.module('main/neontext', function(module, exports, require) {
+(function() {
+  var NeonText;
+  NeonText = function() {
+    function NeonText(text) {
+      this.text = text;
+      this.state = false;
+      this.styles = {};
+      this.styles[true] = "rgb(255, 200, 200)";
+      this.styles[false] = "rgb(200, 200, 200)";
+    }
+    NeonText.prototype.drawOn = function(context, x, y) {
+      context.font = "bold 15pt Arial";
+      context.textAlign = "right";
+      context.fillStyle = this.styles[this.state];
+      if (this.state) {
+        context.shadowBlur = 10;
+        context.shadowColor = "rgba(255, 200, 200, 1)";
+        context.fillText(this.text, x, y);
+        context.fillText(this.text, x, y);
+        context.fillText(this.text, x, y);
+      }
+      return context.fillText(this.text, x, y);
+    };
+    NeonText.prototype.update = function() {
+      return this.state = !this.state;
+    };
+    return NeonText;
+  }();
+  exports.NeonText = NeonText;
 }).call(this);
 
 });
