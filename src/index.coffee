@@ -3,8 +3,8 @@
 #
 
 config = require './config'
+BouncingText = require('./bouncingtext').BouncingText
 Rectangle = require('./rectangle').Rectangle
-freefall = require './freefall'
 
 # Public stuff
 exports.config = config
@@ -14,6 +14,11 @@ exports.start = (screen)->
     window.setInterval gloop(context), config.dt
 
 # Some rectangles to draw
+bouncingText = new BouncingText(
+    "Belmond v0.0.1",
+    config.width/2,
+    config.height*.25,
+    config.height*.75)
 rectangles = (new Rectangle(config.height) for x in [1..200])
 
 # game loop functions
@@ -27,26 +32,9 @@ drawBackgroundOn = (context) ->
     context.fillStyle = lingrad
     context.fillRect 0, 0, config.width, config.height
 
-textMaxHeight = config.height*.75
-textPath = freefall.mirroredFreeFall(textMaxHeight, 20)
-textHeightIndex = 0
-alpha = 0
-
-drawTextOn = (context) ->
-    context.font = "20pt Arial"
-    context.textAlign = "center"
-    context.shadowOffsetX = 5
-    context.shadowOffsetY = 5
-    context.shadowBlur = 5
-    context.shadowColor = "rgba(0, 0, 0, 0.7)"
-    context.fillStyle = "rgba(100, 255, 100, 1)"
-    x = config.width/2 + 200*Math.sin alpha
-    y = textPath[textHeightIndex] + config.height - textMaxHeight
-    context.fillText "Belmond v0.0.1", x, y
-
 drawOn = (context) ->
     drawBackgroundOn context
-    drawTextOn context
+    bouncingText.drawOn context
     context.shadowOffsetX = null
     context.shadowOffsetY = null
     context.shadowBlur = null
@@ -54,11 +42,8 @@ drawOn = (context) ->
     rectangle.drawOn context for rectangle in rectangles
 
 update = (dt) ->
+    bouncingText.update()
     rectangle.update(config.width) for rectangle in rectangles
-    textHeightIndex = textHeightIndex + 1
-    if textHeightIndex >= textPath.length
-        textHeightIndex = 0
-    alpha = alpha+0.01
 
 gloop = (context) ->
     ->

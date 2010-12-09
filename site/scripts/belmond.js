@@ -45,16 +45,17 @@
 }).call(this);
 require.module('main/index', function(module, exports, require) {
 (function() {
-  var Rectangle, alpha, config, drawBackgroundOn, drawOn, drawTextOn, freefall, gloop, rectangles, textHeightIndex, textMaxHeight, textPath, update, x, _results;
+  var BouncingText, Rectangle, bouncingText, config, drawBackgroundOn, drawOn, gloop, rectangles, update, x, _results;
   config = require('./config');
+  BouncingText = require('./bouncingtext').BouncingText;
   Rectangle = require('./rectangle').Rectangle;
-  freefall = require('./freefall');
   exports.config = config;
   exports.start = function(screen) {
     var context;
     context = screen.getContext('2d');
     return window.setInterval(gloop(context), config.dt);
   };
+  bouncingText = new BouncingText("Belmond v0.0.1", config.width / 2, config.height * .25, config.height * .75);
   rectangles = (function() {
     _results = [];
     for (x = 1; x <= 200; x++) {
@@ -73,27 +74,10 @@ require.module('main/index', function(module, exports, require) {
     context.fillStyle = lingrad;
     return context.fillRect(0, 0, config.width, config.height);
   };
-  textMaxHeight = config.height * .75;
-  textPath = freefall.mirroredFreeFall(textMaxHeight, 20);
-  textHeightIndex = 0;
-  alpha = 0;
-  drawTextOn = function(context) {
-    var y;
-    context.font = "20pt Arial";
-    context.textAlign = "center";
-    context.shadowOffsetX = 5;
-    context.shadowOffsetY = 5;
-    context.shadowBlur = 5;
-    context.shadowColor = "rgba(0, 0, 0, 0.7)";
-    context.fillStyle = "rgba(100, 255, 100, 1)";
-    x = config.width / 2 + 200 * Math.sin(alpha);
-    y = textPath[textHeightIndex] + config.height - textMaxHeight;
-    return context.fillText("Belmond v0.0.1", x, y);
-  };
   drawOn = function(context) {
     var rectangle, _i, _len, _results;
     drawBackgroundOn(context);
-    drawTextOn(context);
+    bouncingText.drawOn(context);
     context.shadowOffsetX = null;
     context.shadowOffsetY = null;
     context.shadowBlur = null;
@@ -106,16 +90,14 @@ require.module('main/index', function(module, exports, require) {
     return _results;
   };
   update = function(dt) {
-    var rectangle, _i, _len;
+    var rectangle, _i, _len, _results;
+    bouncingText.update();
+    _results = [];
     for (_i = 0, _len = rectangles.length; _i < _len; _i++) {
       rectangle = rectangles[_i];
-      rectangle.update(config.width);
+      _results.push(rectangle.update(config.width));
     }
-    textHeightIndex = textHeightIndex + 1;
-    if (textHeightIndex >= textPath.length) {
-      textHeightIndex = 0;
-    }
-    return alpha = alpha + 0.01;
+    return _results;
   };
   gloop = function(context) {
     return function() {
@@ -134,38 +116,43 @@ require.module('main/config', function(module, exports, require) {
 }).call(this);
 
 });
-require.module('main/rectangle', function(module, exports, require) {
+require.module('main/bouncingtext', function(module, exports, require) {
 (function() {
-  var Rectangle;
-  Rectangle = function() {
-    function Rectangle(screenHeight) {
-      var maxHeight, minHeight, randomColor;
-      minHeight = 0;
-      maxHeight = screenHeight / 2;
-      randomColor = parseInt(Math.random() * 255);
-      this.width = 5 + Math.random() * 60;
-      this.height = minHeight + Math.random() * (maxHeight - minHeight);
-      this.speed = 1 + Math.random() * 8;
-      this.style = "rgba(10, " + randomColor + ", 10, " + (Math.random()) + ")";
-      this.y = -this.height + Math.random() * (screenHeight + this.height);
-      this.x = -this.width * 20;
+  var BouncingText, freefall;
+  freefall = require('./freefall');
+  BouncingText = function() {
+    function BouncingText(text, xCenter, yStart, yAmplitude) {
+      this.text = text;
+      this.xCenter = xCenter;
+      this.yStart = yStart;
+      this.yAmplitude = yAmplitude;
+      this.yPath = freefall.mirroredFreeFall(this.yAmplitude, 20);
+      this.textHeightIndex = 0;
+      this.alpha = 0;
     }
-    Rectangle.prototype.reset = function() {
-      return this.x = -this.width;
+    BouncingText.prototype.drawOn = function(context) {
+      var x, y;
+      context.font = "20pt Arial";
+      context.textAlign = "center";
+      context.shadowOffsetX = 5;
+      context.shadowOffsetY = 5;
+      context.shadowBlur = 5;
+      context.shadowColor = "rgba(0, 0, 0, 0.7)";
+      context.fillStyle = "rgba(100, 255, 100, 1)";
+      x = this.xCenter + 200 * Math.sin(this.alpha);
+      y = this.yStart + this.yPath[this.textHeightIndex];
+      return context.fillText(this.text, x, y);
     };
-    Rectangle.prototype.update = function(xMax) {
-      this.x = this.x + this.speed;
-      if (this.x > xMax) {
-        return this.reset();
+    BouncingText.prototype.update = function() {
+      this.textHeightIndex = this.textHeightIndex + 1;
+      if (this.textHeightIndex >= this.yPath.length) {
+        this.textHeightIndex = 0;
       }
+      return this.alpha = this.alpha + 0.01;
     };
-    Rectangle.prototype.drawOn = function(context) {
-      context.fillStyle = this.style;
-      return context.fillRect(this.x, this.y, this.width, this.height);
-    };
-    return Rectangle;
+    return BouncingText;
   }();
-  exports.Rectangle = Rectangle;
+  exports.BouncingText = BouncingText;
 }).call(this);
 
 });
@@ -204,6 +191,41 @@ require.module('main/freefall', function(module, exports, require) {
     fall = exports.freeFall(yMax, nbSteps);
     return exports.mirror(fall);
   };
+}).call(this);
+
+});
+require.module('main/rectangle', function(module, exports, require) {
+(function() {
+  var Rectangle;
+  Rectangle = function() {
+    function Rectangle(screenHeight) {
+      var maxHeight, minHeight, randomColor;
+      minHeight = 0;
+      maxHeight = screenHeight / 2;
+      randomColor = parseInt(Math.random() * 255);
+      this.width = 5 + Math.random() * 60;
+      this.height = minHeight + Math.random() * (maxHeight - minHeight);
+      this.speed = 1 + Math.random() * 8;
+      this.style = "rgba(10, " + randomColor + ", 10, " + (Math.random()) + ")";
+      this.y = -this.height + Math.random() * (screenHeight + this.height);
+      this.x = -this.width * 20;
+    }
+    Rectangle.prototype.reset = function() {
+      return this.x = -this.width;
+    };
+    Rectangle.prototype.update = function(xMax) {
+      this.x = this.x + this.speed;
+      if (this.x > xMax) {
+        return this.reset();
+      }
+    };
+    Rectangle.prototype.drawOn = function(context) {
+      context.fillStyle = this.style;
+      return context.fillRect(this.x, this.y, this.width, this.height);
+    };
+    return Rectangle;
+  }();
+  exports.Rectangle = Rectangle;
 }).call(this);
 
 });
