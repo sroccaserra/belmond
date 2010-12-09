@@ -45,9 +45,10 @@
 }).call(this);
 require.module('main/index', function(module, exports, require) {
 (function() {
-  var Rectangle, alpha, config, drawBackgroundOn, drawOn, drawTextOn, gloop, rectangles, textHeightIndex, textMaxHeight, textPath, update, x, _results;
-  Rectangle = require('./rectangle').Rectangle;
+  var Rectangle, alpha, config, drawBackgroundOn, drawOn, drawTextOn, freefall, gloop, rectangles, textHeightIndex, textMaxHeight, textPath, update, x, _results;
   config = require('./config');
+  Rectangle = require('./rectangle').Rectangle;
+  freefall = require('./freefall');
   exports.config = config;
   exports.start = function(screen) {
     var context;
@@ -72,27 +73,8 @@ require.module('main/index', function(module, exports, require) {
     context.fillStyle = lingrad;
     return context.fillRect(0, 0, config.width, config.height);
   };
-  exports.freeFall = function(yMax, nbSteps) {
-    var a, middleIndex, n, path, x, _ref, _results;
-    if (nbSteps === 1) {
-      return [0];
-    }
-    middleIndex = nbSteps - 1;
-    a = yMax / (middleIndex * middleIndex);
-    path = (function() {
-      _results = [];
-      for (x = 0; (0 <= middleIndex ? x <= middleIndex : x >= middleIndex); (0 <= middleIndex ? x += 1 : x -= 1)) {
-        _results.push(a * x * x);
-      }
-      return _results;
-    }());
-    for (n = _ref = middleIndex - 1; (_ref <= 0 ? n <= 0 : n >= 0); (_ref <= 0 ? n += 1 : n -= 1)) {
-      path[2 * middleIndex - n] = path[n];
-    }
-    return path;
-  };
   textMaxHeight = config.height * .75;
-  textPath = exports.freeFall(textMaxHeight, 20);
+  textPath = freefall.mirroredFreeFall(textMaxHeight, 20);
   textHeightIndex = 0;
   alpha = 0;
   drawTextOn = function(context) {
@@ -144,6 +126,14 @@ require.module('main/index', function(module, exports, require) {
 }).call(this);
 
 });
+require.module('main/config', function(module, exports, require) {
+(function() {
+  exports.width = 1000;
+  exports.height = 100;
+  exports.dt = 100 / 6;
+}).call(this);
+
+});
 require.module('main/rectangle', function(module, exports, require) {
 (function() {
   var Rectangle;
@@ -179,11 +169,41 @@ require.module('main/rectangle', function(module, exports, require) {
 }).call(this);
 
 });
-require.module('main/config', function(module, exports, require) {
+require.module('main/freefall', function(module, exports, require) {
 (function() {
-  exports.width = 1000;
-  exports.height = 100;
-  exports.dt = 100 / 6;
+  exports.freeFall = function(yMax, nbSteps) {
+    var a, middleIndex, path, x, _results;
+    if (nbSteps === 1) {
+      return [0];
+    }
+    middleIndex = nbSteps - 1;
+    a = yMax / (middleIndex * middleIndex);
+    path = (function() {
+      _results = [];
+      for (x = 0; (0 <= middleIndex ? x <= middleIndex : x >= middleIndex); (0 <= middleIndex ? x += 1 : x -= 1)) {
+        _results.push(a * x * x);
+      }
+      return _results;
+    }());
+    return path;
+  };
+  exports.mirror = function(array) {
+    var copy, middleIndex, n, _ref;
+    copy = array.slice(0, array.length);
+    if (array.length < 2) {
+      return copy;
+    }
+    middleIndex = copy.length - 1;
+    for (n = _ref = middleIndex - 1; (_ref <= 0 ? n <= 0 : n >= 0); (_ref <= 0 ? n += 1 : n -= 1)) {
+      copy[2 * middleIndex - n] = copy[n];
+    }
+    return copy;
+  };
+  exports.mirroredFreeFall = function(yMax, nbSteps) {
+    var fall;
+    fall = exports.freeFall(yMax, nbSteps);
+    return exports.mirror(fall);
+  };
 }).call(this);
 
 });

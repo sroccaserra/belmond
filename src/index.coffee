@@ -2,8 +2,9 @@
 # Small stuff to learn HTML5 canvas and CoffeeScript
 #
 
-Rectangle = require('./rectangle').Rectangle
 config = require './config'
+Rectangle = require('./rectangle').Rectangle
+freefall = require './freefall'
 
 # Public stuff
 exports.config = config
@@ -26,17 +27,8 @@ drawBackgroundOn = (context) ->
     context.fillStyle = lingrad
     context.fillRect 0, 0, config.width, config.height
 
-exports.freeFall = (yMax, nbSteps) ->
-    if nbSteps is 1
-        return [0]
-    middleIndex = nbSteps - 1
-    a = yMax/(middleIndex*middleIndex)
-    path = (a*x*x for x in [0..middleIndex])
-    path[2*middleIndex-n] = path[n] for n in [middleIndex-1..0]
-    path
-
 textMaxHeight = config.height*.75
-textPath = exports.freeFall(textMaxHeight, 20)
+textPath = freefall.mirroredFreeFall(textMaxHeight, 20)
 textHeightIndex = 0
 alpha = 0
 
