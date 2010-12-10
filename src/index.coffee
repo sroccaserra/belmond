@@ -3,9 +3,10 @@
 #
 
 config = require './config'
-BouncingText = require('./bouncingtext').BouncingText
-Rectangle = require('./rectangle').Rectangle
-NeonText = require('./neontext').NeonText
+postprocess = require './postprocess'
+{BouncingText} = require './bouncingtext'
+{Rectangle} = require './rectangle'
+{NeonText} = require './neontext'
 
 # Public stuff
 exports.config = config
@@ -41,12 +42,16 @@ clearShadows = (context) ->
     context.shadowColor = null
 
 drawOn = (context) ->
+    {width, height} = config
     drawBackgroundOn context
     bouncingText.drawOn context
     clearShadows context
     rectangle.drawOn context for rectangle in rectangles
-    neonText.drawOn context, config.width-10, config.height-10
+    neonText.drawOn context, width-10, height-10
     clearShadows context
+    imageData = context.getImageData 0, 0, width, height
+    postprocess.doublePixels imageData.data, width, height
+    context.putImageData imageData, 0, 0
 
 update = (dt) ->
     bouncingText.update()

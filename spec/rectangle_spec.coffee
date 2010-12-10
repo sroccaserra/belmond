@@ -1,8 +1,8 @@
-rectangle = require 'rectangle'
+{Rectangle} = require 'rectangle'
 
 describe 'Rectangle', ->
     it 'can be created', ->
-        rect = new rectangle.Rectangle(1000)
+        rect = new Rectangle(1000)
         expect(rect).toBeDefined()
 
         expect(rect.x).toBeDefined()
