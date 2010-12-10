@@ -10,14 +10,14 @@ class NeonText
     drawOn: (context, x, y) ->
         context.font = "bold 7pt Arial"
         context.textAlign = "right"
-        context.fillStyle = @styles[@state]
+        context.strokeStyle = @styles[@state]
         if @state
             context.shadowBlur = 10
             context.shadowColor = "rgba(255, 200, 200, 1)"
-            context.fillText @text, x, y
-            context.fillText @text, x, y
-            context.fillText @text, x, y
-        context.fillText @text, x, y
+            context.strokeText @text, x, y
+            context.strokeText @text, x, y
+            context.strokeText @text, x, y
+        context.strokeText @text, x, y
 
     update: ->
         @state = not @state

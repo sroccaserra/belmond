@@ -290,15 +290,15 @@ require.module('main/neontext', function(module, exports, require) {
     NeonText.prototype.drawOn = function(context, x, y) {
       context.font = "bold 7pt Arial";
       context.textAlign = "right";
-      context.fillStyle = this.styles[this.state];
+      context.strokeStyle = this.styles[this.state];
       if (this.state) {
         context.shadowBlur = 10;
         context.shadowColor = "rgba(255, 200, 200, 1)";
-        context.fillText(this.text, x, y);
-        context.fillText(this.text, x, y);
-        context.fillText(this.text, x, y);
+        context.strokeText(this.text, x, y);
+        context.strokeText(this.text, x, y);
+        context.strokeText(this.text, x, y);
       }
-      return context.fillText(this.text, x, y);
+      return context.strokeText(this.text, x, y);
     };
     NeonText.prototype.update = function() {
       return this.state = !this.state;
