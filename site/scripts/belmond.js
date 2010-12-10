@@ -45,8 +45,9 @@
 }).call(this);
 require.module('main/index', function(module, exports, require) {
 (function() {
-  var BouncingText, NeonText, Rectangle, bouncingText, clearShadows, config, drawBackgroundOn, drawOn, getGameLoop, neonText, rectangles, update, x, _results;
+  var BouncingText, NeonText, Rectangle, bouncingText, clearShadows, config, drawBackgroundOn, drawOn, getGameLoop, height, neonText, postprocess, rectangles, update, width, x, _results;
   config = require('./config');
+  postprocess = require('./postprocess');
   BouncingText = require('./bouncingtext').BouncingText;
   Rectangle = require('./rectangle').Rectangle;
   NeonText = require('./neontext').NeonText;
@@ -56,25 +57,27 @@ require.module('main/index', function(module, exports, require) {
     context = screen.getContext('2d');
     return window.setInterval(getGameLoop(context), config.dt);
   };
-  bouncingText = new BouncingText("Belmond", config.width / 2, config.height * .25, config.height * .75);
+  width = config.width / 2;
+  height = config.height / 2;
+  bouncingText = new BouncingText("Belmond", width / 2, height * .25, height * .75);
   rectangles = (function() {
     _results = [];
-    for (x = 1; x <= 200; x++) {
-      _results.push(new Rectangle(config.height));
+    for (x = 1; x <= 100; x++) {
+      _results.push(new Rectangle(height));
     }
     return _results;
   }());
   neonText = new NeonText(config.version);
   drawBackgroundOn = function(context) {
     var lingrad;
-    lingrad = context.createLinearGradient(0, 0, 0, config.height);
+    lingrad = context.createLinearGradient(0, 0, 0, height);
     lingrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
     lingrad.addColorStop(0.25, 'rgba(0, 50, 0, 1)');
     lingrad.addColorStop(0.60, 'rgba(0, 100, 0, 1)');
     lingrad.addColorStop(1, 'rgba(0, 0, 0, 1)');
     context.fillStyle = "rgba(0, 0, 0, 1)";
     context.fillStyle = lingrad;
-    return context.fillRect(0, 0, config.width, config.height);
+    return context.fillRect(0, 0, width, height);
   };
   clearShadows = function(context) {
     context.shadowOffsetX = null;
@@ -83,7 +86,7 @@ require.module('main/index', function(module, exports, require) {
     return context.shadowColor = null;
   };
   drawOn = function(context) {
-    var rectangle, _i, _len;
+    var imageData, rectangle, _i, _len;
     drawBackgroundOn(context);
     bouncingText.drawOn(context);
     clearShadows(context);
@@ -91,15 +94,18 @@ require.module('main/index', function(module, exports, require) {
       rectangle = rectangles[_i];
       rectangle.drawOn(context);
     }
-    neonText.drawOn(context, config.width - 10, config.height - 10);
-    return clearShadows(context);
+    neonText.drawOn(context, width - 10, height - 10);
+    clearShadows(context);
+    imageData = context.getImageData(0, 0, config.width, config.height);
+    postprocess.doublePixels(imageData.data, config.width, config.height);
+    return context.putImageData(imageData, 0, 0);
   };
   update = function(dt) {
     var rectangle, _i, _len;
     bouncingText.update();
     for (_i = 0, _len = rectangles.length; _i < _len; _i++) {
       rectangle = rectangles[_i];
-      rectangle.update(config.width);
+      rectangle.update(width);
     }
     return neonText.update();
   };
@@ -121,6 +127,42 @@ require.module('main/config', function(module, exports, require) {
 }).call(this);
 
 });
+require.module('main/postprocess', function(module, exports, require) {
+(function() {
+  exports.doublePixels = function(pixels, w, h) {
+    var a, b, doubledIndexes, g, hHalf, i, k, r, wHalf, x, y, _i, _len, _ref, _ref2;
+    wHalf = w / 2;
+    hHalf = h / 2;
+    for (y = _ref = hHalf - 1; (_ref <= 0 ? y <= 0 : y >= 0); (_ref <= 0 ? y += 1 : y -= 1)) {
+      for (x = _ref2 = wHalf - 1; (_ref2 <= 0 ? x <= 0 : x >= 0); (_ref2 <= 0 ? x += 1 : x -= 1)) {
+        i = 4 * (x + w * y);
+        r = pixels[i];
+        g = pixels[i + 1];
+        b = pixels[i + 2];
+        a = pixels[i + 3];
+        doubledIndexes = exports.doubledCoords(x, y, w, h);
+        for (_i = 0, _len = doubledIndexes.length; _i < _len; _i++) {
+          k = doubledIndexes[_i];
+          pixels[k] = r;
+          pixels[k + 1] = g;
+          pixels[k + 2] = b;
+          pixels[k + 3] = a;
+        }
+      }
+    }
+    return pixels;
+  };
+  exports.doubledCoords = function(x, y, w, h) {
+    var p0, p1, p2, p3;
+    p0 = 8 * (x + y * w);
+    p1 = p0 + 4;
+    p2 = p0 + w * 4;
+    p3 = p2 + 4;
+    return [p0, p1, p2, p3];
+  };
+}).call(this);
+
+});
 require.module('main/bouncingtext', function(module, exports, require) {
 (function() {
   var BouncingText, freefall;
@@ -137,7 +179,7 @@ require.module('main/bouncingtext', function(module, exports, require) {
     }
     BouncingText.prototype.drawOn = function(context) {
       var x, y;
-      context.font = "20pt Arial";
+      context.font = "10pt Arial";
       context.textAlign = "center";
       context.shadowOffsetX = 5;
       context.shadowOffsetY = 5;
@@ -246,7 +288,7 @@ require.module('main/neontext', function(module, exports, require) {
       this.styles[false] = "rgb(200, 200, 200)";
     }
     NeonText.prototype.drawOn = function(context, x, y) {
-      context.font = "bold 15pt Arial";
+      context.font = "bold 7pt Arial";
       context.textAlign = "right";
       context.fillStyle = this.styles[this.state];
       if (this.state) {

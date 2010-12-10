@@ -8,7 +8,7 @@ class NeonText
         @styles[off] = "rgb(200, 200, 200)"
 
     drawOn: (context, x, y) ->
-        context.font = "bold 15pt Arial"
+        context.font = "bold 7pt Arial"
         context.textAlign = "right"
         context.fillStyle = @styles[@state]
         if @state

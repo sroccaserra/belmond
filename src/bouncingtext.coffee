@@ -11,7 +11,7 @@ class BouncingText
         @alpha = 0
 
     drawOn: (context) ->
-        context.font = "20pt Arial"
+        context.font = "10pt Arial"
         context.textAlign = "center"
         context.shadowOffsetX = 5
         context.shadowOffsetY = 5
