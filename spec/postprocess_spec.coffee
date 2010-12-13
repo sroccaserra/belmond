@@ -2,11 +2,10 @@
 
 describe 'basic looping', ->
     it 'should cover all values', ->
-        v = []
         w = 4
         x = w/2
-        while x--
-            v.push x
+        v = while x--
+            x
         expect(v).toEqual [1, 0]
     # 0, 1
     # 2, 3
