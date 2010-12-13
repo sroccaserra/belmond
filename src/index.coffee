@@ -14,11 +14,13 @@ exports.config = config
 exports.start = (screen)->
     context = screen.getContext '2d'
     window.setInterval getGameLoop(context), config.dt
+    window.addEventListener 'keyup', onKeyUp, true
 
 # state
 
 width = config.width/2
 height = config.height/2
+isPaused = false
 
 # A bouncing text and some rectangles to draw
 bouncingText = new BouncingText(
@@ -58,12 +60,18 @@ drawOn = (context) ->
     context.putImageData imageData, 0, 0
 
 update = (dt) ->
+    if isPaused
+        return
     bouncingText.update()
     rectangle.update(width) for rectangle in rectangles
     neonText.update()
+
+onKeyUp = (event) ->
+    SPACE = 32
+    if event.keyCode is SPACE
+        isPaused = not isPaused
 
 getGameLoop = (context) ->
     ->
         drawOn context
         update config.dt
-

@@ -45,7 +45,7 @@
 }).call(this);
 require.module('main/index', function(module, exports, require) {
 (function() {
-  var BouncingText, NeonText, Rectangle, bouncingText, clearShadows, config, drawBackgroundOn, drawOn, getGameLoop, height, neonText, postprocess, rectangles, update, width, x, _results;
+  var BouncingText, NeonText, Rectangle, bouncingText, clearShadows, config, drawBackgroundOn, drawOn, getGameLoop, height, isPaused, neonText, onKeyUp, postprocess, rectangles, update, width, x, _results;
   config = require('./config');
   postprocess = require('./postprocess');
   BouncingText = require('./bouncingtext').BouncingText;
@@ -55,10 +55,12 @@ require.module('main/index', function(module, exports, require) {
   exports.start = function(screen) {
     var context;
     context = screen.getContext('2d');
-    return window.setInterval(getGameLoop(context), config.dt);
+    window.setInterval(getGameLoop(context), config.dt);
+    return window.addEventListener('keyup', onKeyUp, true);
   };
   width = config.width / 2;
   height = config.height / 2;
+  isPaused = false;
   bouncingText = new BouncingText("Belmond", width / 2, height * .25, height * .75);
   rectangles = (function() {
     _results = [];
@@ -102,12 +104,22 @@ require.module('main/index', function(module, exports, require) {
   };
   update = function(dt) {
     var rectangle, _i, _len;
+    if (isPaused) {
+      return;
+    }
     bouncingText.update();
     for (_i = 0, _len = rectangles.length; _i < _len; _i++) {
       rectangle = rectangles[_i];
       rectangle.update(width);
     }
     return neonText.update();
+  };
+  onKeyUp = function(event) {
+    var SPACE;
+    SPACE = 32;
+    if (event.keyCode === SPACE) {
+      return isPaused = !isPaused;
+    }
   };
   getGameLoop = function(context) {
     return function() {
