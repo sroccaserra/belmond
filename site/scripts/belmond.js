@@ -122,7 +122,7 @@ require.module('main/config', function(module, exports, require) {
 (function() {
   exports.width = 1000;
   exports.height = 100;
-  exports.dt = 100 / 5;
+  exports.dt = 100 / 3;
   exports.version = "v0.0.2";
 }).call(this);
 
@@ -130,12 +130,15 @@ require.module('main/config', function(module, exports, require) {
 require.module('main/postprocess', function(module, exports, require) {
 (function() {
   exports.doublePixels = function(pixels, w, h) {
-    var a, b, doubledIndexes, g, hHalf, i, k, r, wHalf, x, y, _i, _len, _ref, _ref2;
+    var a, b, doubledIndexes, g, hHalf, i, k, r, wHalf, x, y, yOffset, _i, _len;
     wHalf = w / 2;
     hHalf = h / 2;
-    for (y = _ref = hHalf - 1; (_ref <= 0 ? y <= 0 : y >= 0); (_ref <= 0 ? y += 1 : y -= 1)) {
-      for (x = _ref2 = wHalf - 1; (_ref2 <= 0 ? x <= 0 : x >= 0); (_ref2 <= 0 ? x += 1 : x -= 1)) {
-        i = 4 * (x + w * y);
+    y = hHalf;
+    while (y--) {
+      x = wHalf;
+      yOffset = w * y;
+      while (x--) {
+        i = 4 * (x + yOffset);
         r = pixels[i];
         g = pixels[i + 1];
         b = pixels[i + 2];

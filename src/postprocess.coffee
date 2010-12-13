@@ -1,9 +1,12 @@
 exports.doublePixels = (pixels, w, h) ->
     wHalf = w/2
     hHalf = h/2
-    for y in [hHalf-1..0]
-        for x in [wHalf-1..0]
-            i = 4*(x+w*y)
+    y = hHalf
+    while y--
+        x = wHalf
+        yOffset = w*y
+        while x--
+            i = 4*(x + yOffset)
             r = pixels[i]
             g = pixels[i+1]
             b = pixels[i+2]

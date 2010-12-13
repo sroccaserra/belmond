@@ -1,40 +1,25 @@
 {doublePixels, doubledCoords} = require 'postprocess'
 
-describe 'doubling pixels in an array', ->
-    xit 'should double a 2*2 array', ->
-        expect(doublePixels [1, 0, 0, 0], 2, 2).toEqual [1, 1, 1, 1]
-        expect(doublePixels [2, 0, 0, 0], 2, 2).toEqual [2, 2, 2, 2]
-
-    xit 'should double a 2*2 array in place', ->
-        pixels = [1, 0, 0, 0]
-        doublePixels pixels, 2, 2
-        expect(pixels).toEqual [1, 1, 1, 1]
-
-    xit 'should double a 4*4 array', ->
-        pixels = [
-            1, 2, 0, 0
-            3, 4, 0, 0
-            0, 0, 0, 0
-            0, 0, 0, 0
-        ]
-        n = pixels.length
-        doublePixels pixels, 4, 4
-        expect(pixels.length).toEqual n
-        expect(pixels).toEqual [
-            1, 1, 2, 2
-            1, 1, 2, 2
-            3, 3, 4, 4
-            3, 3, 4, 4
-        ]
-
 describe 'basic looping', ->
+    it 'should cover all values', ->
+        v = []
+        w = 4
+        x = w/2
+        while x--
+            v.push x
+        expect(v).toEqual [1, 0]
     # 0, 1
     # 2, 3
     it 'should enumerate in expected order', ->
+        wHalf = 2
+        hHalf = 2
         v = []
-        for y in [1..0]
-            for x in [1..0]
-                v.push x+2*y
+        y = hHalf
+        while y--
+            x = wHalf
+            yOffset = 2*y
+            while x--
+                v.push x + yOffset
         expect(v).toEqual [3, 2, 1, 0]
 
 describe 'doubled pixel coord transformations', ->
@@ -74,3 +59,41 @@ describe 'doubled pixel coord transformations', ->
             48, 52
         ]
 
+describe 'doubling pixels in an array', ->
+    it 'should double a 2*2 array', ->
+        data = [
+            1.1, 1.2, 1.3, 1.4, 0.0, 0.0, 0.0, 0.0
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        ]
+        expect(doublePixels data, 2, 2).toEqual [
+            1.1, 1.2, 1.3, 1.4, 1.1, 1.2, 1.3, 1.4
+            1.1, 1.2, 1.3, 1.4, 1.1, 1.2, 1.3, 1.4
+        ]
+
+    it 'should double a 2*2 array in place', ->
+        data = [
+            1.1, 1.2, 1.3, 1.4, 0.0, 0.0, 0.0, 0.0
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        ]
+        doublePixels data, 2, 2
+        expect(data).toEqual [
+            1.1, 1.2, 1.3, 1.4, 1.1, 1.2, 1.3, 1.4
+            1.1, 1.2, 1.3, 1.4, 1.1, 1.2, 1.3, 1.4
+        ]
+
+    it 'should double a 4*4 array', ->
+        pixels = [
+            1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+            3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 4.4, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        ]
+        n = pixels.length
+        doublePixels pixels, 4, 4
+        expect(pixels.length).toEqual n
+        expect(pixels).toEqual [
+            1.1, 1.2, 1.3, 1.4, 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 2.1, 2.2, 2.3, 2.4
+            1.1, 1.2, 1.3, 1.4, 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4, 2.1, 2.2, 2.3, 2.4
+            3.1, 3.2, 3.3, 3.4, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 4.4, 4.1, 4.2, 4.3, 4.4
+            3.1, 3.2, 3.3, 3.4, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 4.4, 4.1, 4.2, 4.3, 4.4
+        ]
