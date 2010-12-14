@@ -45,7 +45,7 @@
 }).call(this);
 require.module('main/index', function(module, exports, require) {
 (function() {
-  var BouncingText, NeonText, Rectangle, bouncingText, clearShadows, config, drawBackgroundOn, drawOn, getGameLoop, height, isPaused, neonText, onKeyUp, postprocess, rectangles, update, width, x, _results;
+  var BouncingText, NeonText, Rectangle, bouncingText, clearShadows, config, drawBackgroundOn, drawOn, getGameLoop, height, isFiltered, isPaused, neonText, onKeyUp, postprocess, rectangles, update, width, x, _results;
   config = require('./config');
   postprocess = require('./postprocess');
   BouncingText = require('./bouncingtext').BouncingText;
@@ -61,6 +61,7 @@ require.module('main/index', function(module, exports, require) {
   width = config.width / 2;
   height = config.height / 2;
   isPaused = false;
+  isFiltered = false;
   bouncingText = new BouncingText("Belmond", width / 2, height * .25, height * .75);
   rectangles = (function() {
     _results = [];
@@ -98,9 +99,13 @@ require.module('main/index', function(module, exports, require) {
     }
     neonText.drawOn(context, width - 10, height - 10);
     clearShadows(context);
-    imageData = context.getImageData(0, 0, config.width, config.height);
-    postprocess.doublePixels(imageData.data, config.width, config.height);
-    return context.putImageData(imageData, 0, 0);
+    if (isFiltered) {
+      return context.drawImage(context.canvas, 0, 0, config.width * 2, config.height * 2);
+    } else {
+      imageData = context.getImageData(0, 0, config.width, config.height);
+      postprocess.doublePixels(imageData.data, config.width, config.height);
+      return context.putImageData(imageData, 0, 0);
+    }
   };
   update = function(dt) {
     var rectangle, _i, _len;
@@ -115,10 +120,13 @@ require.module('main/index', function(module, exports, require) {
     return neonText.update();
   };
   onKeyUp = function(event) {
-    var SPACE;
+    var F, SPACE;
     SPACE = 32;
+    F = 70;
     if (event.keyCode === SPACE) {
       return isPaused = !isPaused;
+    } else if (event.keyCode === F) {
+      return isFiltered = !isFiltered;
     }
   };
   getGameLoop = function(context) {

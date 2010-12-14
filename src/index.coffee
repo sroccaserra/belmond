@@ -21,6 +21,7 @@ exports.start = (screen)->
 width = config.width/2
 height = config.height/2
 isPaused = false
+isFiltered = false
 
 # A bouncing text and some rectangles to draw
 bouncingText = new BouncingText(
@@ -55,9 +56,12 @@ drawOn = (context) ->
     rectangle.drawOn context for rectangle in rectangles
     neonText.drawOn context, width-10, height-10
     clearShadows context
-    imageData = context.getImageData 0, 0, config.width, config.height
-    postprocess.doublePixels imageData.data, config.width, config.height
-    context.putImageData imageData, 0, 0
+    if isFiltered
+        context.drawImage context.canvas, 0, 0, config.width*2, config.height*2
+    else
+        imageData = context.getImageData 0, 0, config.width, config.height
+        postprocess.doublePixels imageData.data, config.width, config.height
+        context.putImageData imageData, 0, 0
 
 update = (dt) ->
     if isPaused
@@ -68,8 +72,11 @@ update = (dt) ->
 
 onKeyUp = (event) ->
     SPACE = 32
+    F = 70
     if event.keyCode is SPACE
         isPaused = not isPaused
+    else if event.keyCode is F
+        isFiltered = not isFiltered
 
 getGameLoop = (context) ->
     ->
