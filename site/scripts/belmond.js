@@ -45,95 +45,15 @@
 }).call(this);
 require.module('main/index', function(module, exports, require) {
 (function() {
-  var BouncingText, NeonText, Rectangle, bouncingText, clearShadows, config, drawBackgroundOn, drawOn, getGameLoop, height, isFiltered, isPaused, neonText, onKeyUp, postprocess, rectangles, update, width, x, _results;
+  var GameState, config;
   config = require('./config');
-  postprocess = require('./postprocess');
-  BouncingText = require('./bouncingtext').BouncingText;
-  Rectangle = require('./rectangle').Rectangle;
-  NeonText = require('./neontext').NeonText;
+  GameState = require('./gamestate').GameState;
   exports.config = config;
   exports.start = function(screen) {
-    var context;
+    var context, gameState;
     context = screen.getContext('2d');
-    window.setInterval(getGameLoop(context), config.dt);
-    return window.addEventListener('keyup', onKeyUp, true);
-  };
-  width = config.width / 2;
-  height = config.height / 2;
-  isPaused = false;
-  isFiltered = false;
-  bouncingText = new BouncingText("Belmond", width / 2, height * .25, height * .75);
-  rectangles = (function() {
-    _results = [];
-    for (x = 1; x <= 100; x++) {
-      _results.push(new Rectangle(height));
-    }
-    return _results;
-  }());
-  neonText = new NeonText(config.version);
-  drawBackgroundOn = function(context) {
-    var lingrad;
-    lingrad = context.createLinearGradient(0, 0, 0, height);
-    lingrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
-    lingrad.addColorStop(0.25, 'rgba(0, 50, 0, 1)');
-    lingrad.addColorStop(0.60, 'rgba(0, 100, 0, 1)');
-    lingrad.addColorStop(1, 'rgba(0, 0, 0, 1)');
-    context.fillStyle = "rgba(0, 0, 0, 1)";
-    context.fillStyle = lingrad;
-    return context.fillRect(0, 0, width, height);
-  };
-  clearShadows = function(context) {
-    context.shadowOffsetX = null;
-    context.shadowOffsetY = null;
-    context.shadowBlur = null;
-    return context.shadowColor = null;
-  };
-  drawOn = function(context) {
-    var imageData, rectangle, _i, _len;
-    drawBackgroundOn(context);
-    bouncingText.drawOn(context);
-    clearShadows(context);
-    for (_i = 0, _len = rectangles.length; _i < _len; _i++) {
-      rectangle = rectangles[_i];
-      rectangle.drawOn(context);
-    }
-    neonText.drawOn(context, width - 10, height - 10);
-    clearShadows(context);
-    if (isFiltered) {
-      return context.drawImage(context.canvas, 0, 0, config.width * 2, config.height * 2);
-    } else {
-      imageData = context.getImageData(0, 0, config.width, config.height);
-      postprocess.doublePixels(imageData.data, config.width, config.height);
-      return context.putImageData(imageData, 0, 0);
-    }
-  };
-  update = function(dt) {
-    var rectangle, _i, _len;
-    if (isPaused) {
-      return;
-    }
-    bouncingText.update();
-    for (_i = 0, _len = rectangles.length; _i < _len; _i++) {
-      rectangle = rectangles[_i];
-      rectangle.update(width);
-    }
-    return neonText.update();
-  };
-  onKeyUp = function(event) {
-    var F, SPACE;
-    SPACE = 32;
-    F = 70;
-    if (event.keyCode === SPACE) {
-      return isPaused = !isPaused;
-    } else if (event.keyCode === F) {
-      return isFiltered = !isFiltered;
-    }
-  };
-  getGameLoop = function(context) {
-    return function() {
-      drawOn(context);
-      return update(config.dt);
-    };
+    gameState = new GameState(config.width, config.height, config.version, config.dt);
+    return gameState.start(context);
   };
 }).call(this);
 
@@ -144,6 +64,114 @@ require.module('main/config', function(module, exports, require) {
   exports.height = 100;
   exports.dt = 100 / 5;
   exports.version = "v0.0.2";
+}).call(this);
+
+});
+require.module('main/gamestate', function(module, exports, require) {
+(function() {
+  var BouncingText, GameState, NeonText, Rectangle, postprocess;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  postprocess = require('./postprocess');
+  BouncingText = require('./bouncingtext').BouncingText;
+  Rectangle = require('./rectangle').Rectangle;
+  NeonText = require('./neontext').NeonText;
+  GameState = function() {
+    function GameState(width, height, version, dt) {
+      var x, _results;
+      this.dt = dt;
+      this.onKeyUp = __bind(this.onKeyUp, this);;
+      this.width = width / 2;
+      this.height = height / 2;
+      this.isPaused = false;
+      this.isFiltered = false;
+      this.bouncingText = new BouncingText("Belmond", this.width / 2, this.height * .25, this.height * .75);
+      this.rectangles = (function() {
+        _results = [];
+        for (x = 1; x <= 100; x++) {
+          _results.push(new Rectangle(this.height));
+        }
+        return _results;
+      }.call(this));
+      this.neonText = new NeonText(version);
+    }
+    GameState.prototype.start = function(context) {
+      window.addEventListener('keyup', this.onKeyUp, true);
+      return this.loopId = window.setInterval(__bind(function() {
+        this.drawOn(context);
+        return this.update(this.dt);
+      }, this), this.dt);
+    };
+    GameState.prototype.stop = function() {
+      window.removeEventListener('keyup', this.onKeyUp, true);
+      return window.clearInterval(this.loopId);
+    };
+    GameState.prototype.drawBackgroundOn = function(context) {
+      var lingrad;
+      lingrad = context.createLinearGradient(0, 0, 0, this.height);
+      lingrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
+      lingrad.addColorStop(0.25, 'rgba(0, 50, 0, 1)');
+      lingrad.addColorStop(0.60, 'rgba(0, 100, 0, 1)');
+      lingrad.addColorStop(1, 'rgba(0, 0, 0, 1)');
+      context.fillStyle = "rgba(0, 0, 0, 1)";
+      context.fillStyle = lingrad;
+      return context.fillRect(0, 0, this.width, this.height);
+    };
+    GameState.prototype.clearShadows = function(context) {
+      context.shadowOffsetX = null;
+      context.shadowOffsetY = null;
+      context.shadowBlur = null;
+      return context.shadowColor = null;
+    };
+    GameState.prototype.drawOn = function(context) {
+      var canvas, imageData, rectangle, _i, _len, _ref;
+      this.drawBackgroundOn(context);
+      this.bouncingText.drawOn(context);
+      this.clearShadows(context);
+      _ref = this.rectangles;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        rectangle = _ref[_i];
+        rectangle.drawOn(context);
+      }
+      this.neonText.drawOn(context, this.width - 10, this.height - 10);
+      this.clearShadows(context);
+      if (this.isFiltered) {
+        canvas = context.canvas;
+        return context.drawImage(canvas, 0, 0, canvas.width * 2, canvas.height * 2);
+      } else {
+        canvas = context.canvas;
+        imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        postprocess.doublePixels(imageData.data, canvas.width, canvas.height);
+        return context.putImageData(imageData, 0, 0);
+      }
+    };
+    GameState.prototype.update = function(dt) {
+      var rectangle, _i, _len, _ref;
+      if (this.isPaused) {
+        return;
+      }
+      this.bouncingText.update();
+      _ref = this.rectangles;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        rectangle = _ref[_i];
+        rectangle.update(this.width);
+      }
+      return this.neonText.update();
+    };
+    GameState.prototype.onKeyUp = function(event) {
+      var F, SPACE;
+      SPACE = 32;
+      F = 70;
+      if (event.keyCode === SPACE) {
+        return this.isPaused = !this.isPaused;
+      } else if (event.keyCode === F) {
+        return this.isFiltered = !this.isFiltered;
+      } else if (event.keyCode === 83) {
+        return this.stop();
+      }
+    };
+    return GameState;
+  }();
+  exports.GameState = GameState;
 }).call(this);
 
 });
