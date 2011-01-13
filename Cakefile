@@ -26,7 +26,7 @@ task 'bundle', 'Sorts the dependencies and bundles sources', ->
 
 task 'run', ->
     invoke 'bundle'
-    exec 'cygstart site/index.html'
+    exec 'open site/index.html'
 
 task 'build', ->
     villainCake.compileDirectory 'src', 'build'

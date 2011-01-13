@@ -75,9 +75,9 @@ require.module('main/gamestate', function(module, exports, require) {
   BouncingText = require('./bouncingtext').BouncingText;
   Rectangle = require('./rectangle').Rectangle;
   NeonText = require('./neontext').NeonText;
-  GameState = function() {
+  GameState = (function() {
     function GameState(width, height, version, dt) {
-      var x, _results;
+      var x;
       this.dt = dt;
       this.onKeyUp = __bind(this.onKeyUp, this);;
       this.width = width / 2;
@@ -86,12 +86,13 @@ require.module('main/gamestate', function(module, exports, require) {
       this.isFiltered = false;
       this.bouncingText = new BouncingText("Belmond", this.width / 2, this.height * .25, this.height * .75);
       this.rectangles = (function() {
+        var _results;
         _results = [];
         for (x = 1; x <= 100; x++) {
           _results.push(new Rectangle(this.height));
         }
         return _results;
-      }.call(this));
+      }).call(this);
       this.neonText = new NeonText(version);
     }
     GameState.prototype.start = function(context) {
@@ -170,7 +171,7 @@ require.module('main/gamestate', function(module, exports, require) {
       }
     };
     return GameState;
-  }();
+  })();
   exports.GameState = GameState;
 }).call(this);
 
@@ -218,7 +219,7 @@ require.module('main/bouncingtext', function(module, exports, require) {
 (function() {
   var BouncingText, freefall;
   freefall = require('./freefall');
-  BouncingText = function() {
+  BouncingText = (function() {
     function BouncingText(text, xCenter, yStart, yAmplitude) {
       this.text = text;
       this.xCenter = xCenter;
@@ -249,7 +250,7 @@ require.module('main/bouncingtext', function(module, exports, require) {
       return this.alpha = this.alpha + 0.01;
     };
     return BouncingText;
-  }();
+  })();
   exports.BouncingText = BouncingText;
 }).call(this);
 
@@ -257,19 +258,20 @@ require.module('main/bouncingtext', function(module, exports, require) {
 require.module('main/freefall', function(module, exports, require) {
 (function() {
   exports.freeFall = function(yMax, nbSteps) {
-    var a, middleIndex, path, x, _results;
+    var a, middleIndex, path, x;
     if (nbSteps === 1) {
       return [0];
     }
     middleIndex = nbSteps - 1;
     a = yMax / (middleIndex * middleIndex);
     path = (function() {
+      var _results;
       _results = [];
       for (x = 0; (0 <= middleIndex ? x <= middleIndex : x >= middleIndex); (0 <= middleIndex ? x += 1 : x -= 1)) {
         _results.push(a * x * x);
       }
       return _results;
-    }());
+    })();
     return path;
   };
   exports.mirror = function(array) {
@@ -295,7 +297,7 @@ require.module('main/freefall', function(module, exports, require) {
 require.module('main/rectangle', function(module, exports, require) {
 (function() {
   var Rectangle;
-  Rectangle = function() {
+  Rectangle = (function() {
     function Rectangle(screenHeight) {
       var maxHeight, minHeight, randomColor;
       minHeight = 0;
@@ -322,7 +324,7 @@ require.module('main/rectangle', function(module, exports, require) {
       return context.fillRect(this.x, this.y, this.width, this.height);
     };
     return Rectangle;
-  }();
+  })();
   exports.Rectangle = Rectangle;
 }).call(this);
 
@@ -330,7 +332,7 @@ require.module('main/rectangle', function(module, exports, require) {
 require.module('main/neontext', function(module, exports, require) {
 (function() {
   var NeonText;
-  NeonText = function() {
+  NeonText = (function() {
     function NeonText(text) {
       this.text = text;
       this.state = false;
@@ -355,7 +357,7 @@ require.module('main/neontext', function(module, exports, require) {
       return this.state = !this.state;
     };
     return NeonText;
-  }();
+  })();
   exports.NeonText = NeonText;
 }).call(this);
 
